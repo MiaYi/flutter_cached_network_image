@@ -1,4 +1,5 @@
 import 'dart:async' show Future, StreamController;
+import 'dart:typed_data';
 import 'dart:ui' as ui show Codec;
 
 import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart'
@@ -18,6 +19,11 @@ import 'package:cached_network_image_platform_interface/cached_network_image_pla
 /// Function which is called after loading the image failed.
 typedef ErrorListener = void Function();
 
+/// Decode function which is called after file download finish.
+typedef CustomDecoderCallback = Future<ui.Codec> Function(
+    Uint8List bytes, DecoderCallback decode,
+    {int? cacheWidth, int? cacheHeight, bool allowUpscaling});
+
 /// IO implementation of the CachedNetworkImageProvider; the ImageProvider to
 /// load network images using a cache.
 class CachedNetworkImageProvider
@@ -34,6 +40,7 @@ class CachedNetworkImageProvider
     this.cacheManager,
     this.cacheKey,
     this.imageRenderMethodForWeb = ImageRenderMethodForWeb.HtmlImage,
+    this.customDecode,
   });
 
   /// CacheManager from which the image files are loaded.
@@ -65,6 +72,8 @@ class CachedNetworkImageProvider
   /// Render option for images on the web platform.
   final ImageRenderMethodForWeb imageRenderMethodForWeb;
 
+  final CustomDecoderCallback? customDecode;
+
   @override
   Future<CachedNetworkImageProvider> obtainKey(
       ImageConfiguration configuration) {
@@ -76,7 +85,13 @@ class CachedNetworkImageProvider
       image_provider.CachedNetworkImageProvider key, DecoderCallback decode) {
     final chunkEvents = StreamController<ImageChunkEvent>();
     return MultiImageStreamCompleter(
-      codec: _loadAsync(key, chunkEvents, decode),
+      codec: _loadAsync(key, chunkEvents, (Uint8List bytes,
+          {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+        if (customDecode != null) {
+          return customDecode!(bytes, decode);
+        }
+        return decode(bytes);
+      }),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       informationCollector: () sync* {
