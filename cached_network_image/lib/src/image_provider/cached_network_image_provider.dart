@@ -72,6 +72,7 @@ class CachedNetworkImageProvider
   /// Render option for images on the web platform.
   final ImageRenderMethodForWeb imageRenderMethodForWeb;
 
+  /// Decode function which is called after file download finish.
   final CustomDecoderCallback? customDecode;
 
   @override
