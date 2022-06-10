@@ -33,6 +33,7 @@ class ImageLoader {
     Function()? errorListener,
     ImageRenderMethodForWeb imageRenderMethodForWeb,
     Function() evictImage,
+    CustomDecoder? customDecoder,
   ) {
     throw UnimplementedError();
   }

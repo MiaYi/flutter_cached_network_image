@@ -203,7 +203,10 @@ class CachedNetworkImage extends StatelessWidget {
   final int? maxHeightDiskCache;
 
   /// Decode function which is called after file download finish.
-  final CustomDecoderCallback? customDecode;
+  final CustomDecoderCallback? customDecoderCallback;
+
+  ///
+  final CustomDecoder? customDecoder;
 
   /// CachedNetworkImage shows a network image using a caching mechanism. It also
   /// provides support for a placeholder, showing an error and fading into the
@@ -238,7 +241,8 @@ class CachedNetworkImage extends StatelessWidget {
     this.cacheKey,
     this.maxWidthDiskCache,
     this.maxHeightDiskCache,
-    this.customDecode,
+    this.customDecoderCallback,
+    this.customDecoder,
     ImageRenderMethodForWeb imageRenderMethodForWeb =
         ImageRenderMethodForWeb.HtmlImage,
   })  : _image = CachedNetworkImageProvider(
@@ -249,7 +253,8 @@ class CachedNetworkImage extends StatelessWidget {
           imageRenderMethodForWeb: imageRenderMethodForWeb,
           maxWidth: maxWidthDiskCache,
           maxHeight: maxHeightDiskCache,
-          customDecode: customDecode,
+          customDecoderCallback: customDecoderCallback,
+          customDecoder: customDecoder,
         ),
         super(key: key);
 

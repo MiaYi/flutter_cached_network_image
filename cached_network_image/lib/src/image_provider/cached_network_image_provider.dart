@@ -4,17 +4,16 @@ import 'dart:ui' as ui show Codec;
 
 import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart'
     show ImageRenderMethodForWeb;
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart'
+    if (dart.library.io) '_image_loader.dart'
+    if (dart.library.html) 'package:cached_network_image_web/cached_network_image_web.dart'
+    show ImageLoader;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import 'cached_network_image_provider.dart' as image_provider;
 import 'multi_image_stream_completer.dart';
-
-import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart'
-    if (dart.library.io) '_image_loader.dart'
-    if (dart.library.html) 'package:cached_network_image_web/cached_network_image_web.dart'
-    show ImageLoader;
 
 /// Function which is called after loading the image failed.
 typedef ErrorListener = void Function();
@@ -40,7 +39,8 @@ class CachedNetworkImageProvider
     this.cacheManager,
     this.cacheKey,
     this.imageRenderMethodForWeb = ImageRenderMethodForWeb.HtmlImage,
-    this.customDecode,
+    this.customDecoderCallback,
+    this.customDecoder,
   });
 
   /// CacheManager from which the image files are loaded.
@@ -73,7 +73,10 @@ class CachedNetworkImageProvider
   final ImageRenderMethodForWeb imageRenderMethodForWeb;
 
   /// Decode function which is called after file download finish.
-  final CustomDecoderCallback? customDecode;
+  final CustomDecoderCallback? customDecoderCallback;
+
+  ///
+  final CustomDecoder? customDecoder;
 
   @override
   Future<CachedNetworkImageProvider> obtainKey(
@@ -88,8 +91,8 @@ class CachedNetworkImageProvider
     return MultiImageStreamCompleter(
       codec: _loadAsync(key, chunkEvents, (Uint8List bytes,
           {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
-        if (customDecode != null) {
-          return customDecode!(bytes, decode);
+        if (customDecoderCallback != null) {
+          return customDecoderCallback!(bytes, decode);
         }
         return decode(bytes);
       }),
@@ -123,6 +126,7 @@ class CachedNetworkImageProvider
       errorListener,
       imageRenderMethodForWeb,
       () => PaintingBinding.instance?.imageCache?.evict(key),
+      customDecoder,
     );
   }
 
