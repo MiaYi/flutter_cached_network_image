@@ -63,7 +63,7 @@ class ImageLoader implements platform.ImageLoader {
           yield decoded;
         }
       }
-    } catch (e) {
+    } catch (e, s) {
       // Depending on where the exception was thrown, the image cache may not
       // have had a chance to track the key in the cache at all.
       // Schedule a microtask to give the cache a chance to add the key.
@@ -71,6 +71,8 @@ class ImageLoader implements platform.ImageLoader {
         evictImage();
       });
 
+      debugPrint(e.toString());
+      debugPrint(s.toString());
       errorListener?.call();
       rethrow;
     } finally {
