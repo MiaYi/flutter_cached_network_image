@@ -2,15 +2,14 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-
 import 'package:cached_network_image_platform_interface'
         '/cached_network_image_platform_interface.dart' as platform
     show ImageLoader;
 import 'package:cached_network_image_platform_interface'
         '/cached_network_image_platform_interface.dart'
     show ImageRenderMethodForWeb;
+import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class ImageLoader implements platform.ImageLoader {
   @override
@@ -59,13 +58,15 @@ class ImageLoader implements platform.ImageLoader {
           yield decoded;
         }
       }
-    } catch (e) {
+    } catch (e, s) {
       // Depending on where the exception was thrown, the image cache may not
       // have had a chance to track the key in the cache at all.
       // Schedule a microtask to give the cache a chance to add the key.
       scheduleMicrotask(() {
         evictImage();
       });
+      debugPrint(e.toString());
+      debugPrint(s.toString());
 
       errorListener?.call();
       rethrow;
